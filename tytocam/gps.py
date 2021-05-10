@@ -17,7 +17,12 @@ class GPS:
 
         self.lat = None
         self.lon = None
-        self.gps_serial = serial.Serial("/dev/ttyUSB1", baudrate=115200, timeout=0.5, rtscts=True, dsrdtr=True)
+        try:
+            self.gps_serial = serial.Serial("/dev/ttyUSB1", baudrate=115200, timeout=0.5, rtscts=True, dsrdtr=True)
+        except Exception as e:
+            self.gps_serial=None
+            print("Serial port connection failed.")
+            print(e)
 
     @classmethod
     def decode(self, coord):
@@ -53,5 +58,6 @@ class GPS:
     def readGPS(self):
 
         while True:
-            data = self.gps_serial.readline().decode('utf-8')
-            self.__parseGPS(data)
+            if self.gps_serial is not None:
+                data = self.gps_serial.readline().decode('utf-8')
+                self.__parseGPS(data)

@@ -6,8 +6,7 @@ import glob
 from django_orm.Video_Files.models import Video_File
 from django_orm.Users.models import TytoUser
 from wifi_connect import *
-from django_orm.settings_orm import *
-from tytocam.aws_credentials import *
+from aws_credentials import *
 
 class Uploader:
 

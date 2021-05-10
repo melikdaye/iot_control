@@ -9,9 +9,9 @@ import threading
 from subprocess import call
 from django_orm.AdminPanel.models import TytoCamera
 import csv
-from tytocam.gps import *
+from gps import *
 import gc
-from tytocam.aws_credentials import *
+from aws_credentials import *
 
 class Camera:
 

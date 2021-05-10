@@ -1,13 +1,15 @@
 import paho.mqtt.client as paho
 import threading
 import json
+from django_orm.settings_orm import *
 from gstreamer_camera import Camera
 from uploader import Uploader
 from getmac import get_mac_address as gma
 from requests import get
-import django
 from wifi_connect import *
 from autossh import startReverseProxy
+import os
+
 
 client = None
 autossh = False
@@ -54,6 +56,12 @@ def on_message(client, userdata, message):
             elif command == "connect_wifi":
                 ret = wifi_connect(command_dict["0"]["ssid"], command_dict["0"]["password"])
                 connect_device()
+            elif command == "forget_wifi":
+                wifi_forget(command_dict["0"]["ssid"])
+                time.sleep(2)
+                client.publish("settings", json.dumps(search_wifi()), retain=False)
+            elif command=="reboot":
+                 os.system("sudo reboot")
             device_props = collect_props()
             if ret_message is not None:
                 device_props["message"] = ret_message
@@ -95,7 +103,7 @@ def collect_props():
 
 def on_connect(client, userdata, flags, rc):
     print("connected")
-
+    client.publish("settings", json.dumps(search_wifi()), retain=False)
     gps_signal = threading.Timer(15.0, send_gps, args=[client])
     gps_signal.start()
     client.subscribe("assign_id")
@@ -112,7 +120,7 @@ def send_gps(client):
             camera.camera_props.last_lon = camera.lon
             camera.camera_props.gps_timestamp = django.utils.timezone.now()
             camera.camera_props.save()
-
+        print("WhoIam",device_props)
         client.publish("whoIam", json.dumps(device_props), retain=False)
     except:
         pass

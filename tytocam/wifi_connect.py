@@ -80,3 +80,6 @@ def wifi_connect(ssid, password):
         else:
             pynmcli.NetworkManager.Device().wifi().connect('"{:s}" password "{:s}"'.format(ssid, password)).execute()
         time.sleep(20)
+
+def wifi_forget(ssid):
+    pynmcli.NetworkManager().Connection().delete(ssid).execute()

@@ -1,10 +1,11 @@
-picamera==1.13
-getmac==0.8.2
-pynmcli==1.0.5
-PyGObject==3.30.4
-Django==2.2.4
-numpy==1.16.2
 requests==2.21.0
+PyGObject==3.30.4
+getmac==0.8.2
 boto3==1.17.66
+pynmcli==1.0.5
+Django==2.2.4
 paho_mqtt==1.5.1
 pyserial==3.5
+PyYAML==5.4.1
+picamera==1.13
+psycopg2==2.8.6

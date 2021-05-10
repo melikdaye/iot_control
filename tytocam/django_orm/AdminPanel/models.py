@@ -1,5 +1,5 @@
 from django.db import models
-from tytocam.django_orm.Users.models import TytoUser
+from django_orm.Users.models import TytoUser
 
 
 class ComputeServer(models.Model):

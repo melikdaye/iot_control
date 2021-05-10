@@ -1,6 +1,6 @@
 from django.db import models
-from tytocam.django_orm.Users.models import TytoUser
-from tytocam.django_orm.AdminPanel import DatasetQueue
+from django_orm.Users.models import TytoUser
+from django_orm.AdminPanel.models import DatasetQueue
 import datetime
 
 class Video_File(models.Model):
