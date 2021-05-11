@@ -50,6 +50,11 @@ class Camera:
 
         source.set_property("video-stabilisation", True)
         source.set_property("annotation-mode", "custom-text")
+        source.set_property("roi-x",0.1)
+        source.set_property("roi-y",0.2)
+        source.set_property("roi-w",0.8)
+        source.set_property("roi-h",0.8)
+
         videoConvert = Gst.ElementFactory.make("videoconvert", "video_convert")
         srcCaps = Gst.Caps.from_string(
             "video/x-raw,width=(int){:s}, height=(int){:s}, framerate=(fraction){:s}/1".format(str(1920),
