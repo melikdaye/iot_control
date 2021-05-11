@@ -4,7 +4,7 @@ import serial
 
 class GPS:
 
-    def __init__(self):
+    def __init__(self,logger):
 
         try:
             serw = serial.Serial("/dev/ttyUSB2", baudrate=115200, timeout=1, rtscts=True, dsrdtr=True)
@@ -12,8 +12,8 @@ class GPS:
             serw.close()
             sleep(1)
         except Exception as e:
-            print("Serial port connection failed.")
-            print(e)
+            logger.logger.error("Serial port connection failed",exc_info=True)
+
 
         self.lat = None
         self.lon = None
@@ -21,8 +21,7 @@ class GPS:
             self.gps_serial = serial.Serial("/dev/ttyUSB1", baudrate=115200, timeout=0.5, rtscts=True, dsrdtr=True)
         except Exception as e:
             self.gps_serial=None
-            print("Serial port connection failed.")
-            print(e)
+            logger.logger.error("Serial port connection failed",exc_info=True)
 
     @classmethod
     def decode(self, coord):

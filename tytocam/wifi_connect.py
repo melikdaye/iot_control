@@ -2,7 +2,9 @@ import time
 import pynmcli
 
 from subprocess import check_call, CalledProcessError, PIPE
+from logger import *
 
+logger=TytoLog()
 
 def is_reachable(inter, i, add):
     command = ["ping", "-I", inter, "-c", i, add]
@@ -10,17 +12,18 @@ def is_reachable(inter, i, add):
         check_call(command, stdout=PIPE)
         return True
     except CalledProcessError as e:
-        print(e)
+        logger.logger.error(e)
         return False
 
 
 def checkWifiConnectivity():
-    available_wifis = search_wifi()
-    inuseDevice = [x for x in available_wifis['Devices'] if x["IN-USE"] == True]
-    if len(inuseDevice) > 0:
-        is_reachable("wlan0", "4", "www.google.com")
-    else:
-        return False
+    # available_wifis = search_wifi()
+    # inuseDevice = [x for x in available_wifis['Devices'] if x["IN-USE"] == True]
+    # print(inuseDevice)
+    # if len(inuseDevice) > 0:
+    return is_reachable("wlan0", "1", "www.google.com")
+    # else:
+    #     return False
 
 
 def check_registered(cells, ssid):
@@ -33,7 +36,6 @@ def check_registered(cells, ssid):
 def search_wifi():
     avail_wifi = {}
     avail_wifi.setdefault("Devices", [])
-    # avail_wifi.setdefault("Registered", [])
     pynmcli.NetworkManager().Device().wifi('rescan').execute()
     cells = pynmcli.get_data(pynmcli.NetworkManager.Device().wifi('list').execute())
     registered_cells = pynmcli.get_data(pynmcli.NetworkManager.Connection().show().execute())
@@ -59,7 +61,6 @@ def search_wifi():
 
         avail_wifi["Devices"].append(filtered_dict)
 
-    print(avail_wifi)
     return avail_wifi
 
 
@@ -76,10 +77,10 @@ def wifi_connect(ssid, password):
             break
     if selected_wifi is not None:
         if registered:
-            pynmcli.NetworkManager.Connection().up('"{:s}"'.format(ssid)).execute()
+            logger.logger.debug(pynmcli.NetworkManager.Connection().up('"{:s}"'.format(ssid)).execute())
         else:
-            pynmcli.NetworkManager.Device().wifi().connect('"{:s}" password "{:s}"'.format(ssid, password)).execute()
-        time.sleep(20)
+            logger.logger.debug(pynmcli.NetworkManager.Device().wifi().connect('"{:s}" password "{:s}"'.format(ssid, password)).execute())
+        time.sleep(10)
 
 def wifi_forget(ssid):
-    pynmcli.NetworkManager().Connection().delete(ssid).execute()
+    logger.logger.debug(pynmcli.NetworkManager().Connection().delete(ssid).execute())

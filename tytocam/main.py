@@ -13,13 +13,17 @@ import os
 
 client = None
 autossh = False
-camera = Camera()
+camera = Camera(logger)
 
+
+def wait_for_wifiList(client):
+    time.sleep(5)
+    client.publish("settings", json.dumps(search_wifi()), retain=False)
 
 # define callbacks
 def on_message(client, userdata, message):
     global autossh
-    print("received message =", str(message.payload.decode("utf-8")))
+    logger.logger.debug("Received message = {:s}".format(str(message.payload.decode("utf-8"))))
     if message.topic == "assign_id":
         id_dict = json.loads(message.payload)
         if id_dict["mac"] == gma():
@@ -27,7 +31,6 @@ def on_message(client, userdata, message):
             if autossh is False:
                 startReverseProxy(camera.device_id)
                 autossh = True
-            print(camera.device_id)
 
     elif message.topic == "device_command":
         ret_message = None
@@ -54,12 +57,11 @@ def on_message(client, userdata, message):
             elif command == "get_connections":
                 client.publish("settings", json.dumps(search_wifi()), retain=False)
             elif command == "connect_wifi":
-                ret = wifi_connect(command_dict["0"]["ssid"], command_dict["0"]["password"])
-                connect_device()
+                wifi_connect(command_dict["0"]["ssid"], command_dict["0"]["password"])
+                threading.Thread(target=wait_for_wifiList,args=[client]).start()
             elif command == "forget_wifi":
                 wifi_forget(command_dict["0"]["ssid"])
-                time.sleep(2)
-                client.publish("settings", json.dumps(search_wifi()), retain=False)
+                threading.Thread(target=wait_for_wifiList,args=[client]).start()
             elif command=="reboot":
                  os.system("sudo reboot")
             device_props = collect_props()
@@ -80,7 +82,6 @@ def on_message(client, userdata, message):
 
 
 def on_publish(client, userdata, result):  # create function for callback
-    print(userdata, "data published \n")
     pass
 
 
@@ -102,7 +103,7 @@ def collect_props():
 
 
 def on_connect(client, userdata, flags, rc):
-    print("connected")
+    logger.logger.info("Device connected to MQTT broker")
     client.publish("settings", json.dumps(search_wifi()), retain=False)
     gps_signal = threading.Timer(15.0, send_gps, args=[client])
     gps_signal.start()
@@ -113,14 +114,12 @@ def on_connect(client, userdata, flags, rc):
 
 def send_gps(client):
     device_props = collect_props()
-    print("send_gps", camera.lat, camera.lon)
     try:
         if camera.lat and camera.lon is not None:
             camera.camera_props.last_lat = camera.lat
             camera.camera_props.last_lon = camera.lon
             camera.camera_props.gps_timestamp = django.utils.timezone.now()
             camera.camera_props.save()
-        print("WhoIam",device_props)
         client.publish("whoIam", json.dumps(device_props), retain=False)
     except:
         pass
@@ -133,15 +132,12 @@ def get_gps():
     gps_thread.start()
 
 
-##connect_device
 def connect_device():
     client = paho.Client()
     client.on_message = on_message
     client.on_connect = on_connect
     client.username_pw_set(username="ubuntu", password="247520")
     client.connect("monitor.tytovision.com", 8883, 2000)
-
-    ##start loop to process received messages
     client.loop_forever()
 
 

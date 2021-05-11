@@ -11,5 +11,3 @@ def startReverseProxy(id):
         key_parent_path,str(1024 + id))
     procAutoSsh = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
     time.sleep(2)
-    print(procKill.__dict__)
-    print(procAutoSsh.__dict__)

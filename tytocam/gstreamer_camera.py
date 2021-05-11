@@ -15,12 +15,12 @@ from aws_credentials import *
 
 class Camera:
 
-    def __init__(self):
+    def __init__(self,logger):
 
         GObject.threads_init()
         Gst.init(None)
         mac_address = gma()
-        self.gps = GPS()
+        self.gps = GPS(logger)
         try:
             self.camera_props = TytoCamera.objects.get(mac_address=mac_address)
             self.device_id = self.camera_props.id
@@ -41,19 +41,20 @@ class Camera:
         self.ignoreFile = None
         self.csvWriter = None
         self.frame_loss = 0
+        self.max_video_duration=15
+        self.record_fps=15
         self.preWriteStatus = self.writeDisk
 
         self.pipeline = Gst.Pipeline()
         source = Gst.ElementFactory.make("rpicamsrc", "source")
-        # source.set_property("do-timestamp", True)
+
         source.set_property("video-stabilisation", True)
         source.set_property("annotation-mode", "custom-text")
-        # source.set_property("preview", True)
         videoConvert = Gst.ElementFactory.make("videoconvert", "video_convert")
         srcCaps = Gst.Caps.from_string(
             "video/x-raw,width=(int){:s}, height=(int){:s}, framerate=(fraction){:s}/1".format(str(1920),
                                                                                                str(1080),
-                                                                                               str(15)))
+                                                                                               str(self.record_fps)))
 
         tee = Gst.ElementFactory.make('tee', 'tee')
 
@@ -70,7 +71,7 @@ class Camera:
         self.fileSink = Gst.ElementFactory.make('splitmuxsink', 'file_sink')
         self.fileSink.set_property('async-handling', True)
 
-        self.fileSink.set_property("max-size-time", 1000000000 * 60 * 15)
+        self.fileSink.set_property("max-size-time", 1000000000 * 60 * self.max_video_duration)
 
         self.fileSink.set_property("muxer", muxer)
         self.fileSink.set_property("sink", infileSink)
@@ -182,7 +183,7 @@ class Camera:
         self.pre_lat = None
         self.pre_lon = None
         self.session = None
-
+        self.file_parent_path = os.path.dirname(os.path.realpath(__file__))
         self.run_config()
 
     def run_config(self):
@@ -206,11 +207,11 @@ class Camera:
         path = "{:s}{:s}.mkv".format("RECORDS/{:s}/".format(date_time), datetime.now().strftime("%H_%M_%S"))
 
         if self.writeDisk:
-            self.currentFile = path
+            self.currentFile = os.path.join(self.file_parent_path,path)
             csv_file = open(path.replace(".mkv", ".csv"), "w")
             self.csvWriter = csv.writer(csv_file, delimiter=';')
         else:
-            self.ignoreFile = path
+            self.ignoreFile = os.path.join(self.file_parent_path,path)
             self.preWriteStatus = False
         return path
 
@@ -243,7 +244,6 @@ class Camera:
         while True:
             gc.collect()
             if self.gps.lat and self.gps.lon is not None:
-                print("get_gps", self.gps.lat, self.gps.lon)
                 self.lat = self.gps.lat
                 self.lon = self.gps.lon
             else:
@@ -251,7 +251,7 @@ class Camera:
                 self.pre_lon = self.lon
                 self.lat = None
                 self.lon = None
-            sleep(2)
+            time.sleep(2)
 
     def stop_pipeline(self):
         # Free resources
@@ -269,7 +269,6 @@ class Camera:
 
     def stop_write(self):
 
-        # self.fileValve.set_property("drop",True)
         self.fileSink.emit("split-now")
         self.fakeValve.set_property("drop", True)
         self.writeDisk = False
@@ -277,7 +276,6 @@ class Camera:
 
     def start_write(self):
 
-        # self.fileValve.set_property("drop", False)
         self.fileSink.emit("split-now")
         self.fakeValve.set_property("drop", False)
         self.writeDisk = True
