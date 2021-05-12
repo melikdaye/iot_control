@@ -6,6 +6,5 @@ pynmcli==1.0.5
 Django==2.2.4
 paho_mqtt==1.5.1
 pyserial==3.5
-PyYAML==5.4.1
 picamera==1.13
 psycopg2==2.8.6
