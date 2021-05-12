@@ -10,11 +10,13 @@ For installation
   - export GITHUB_TOKEN=<GITHUB_TOKEN>
 - Execute "sudo -E sh ./tyto_camera_installer.sh"
 
-- For monitor service status :
+- Monitor service status :
   - sudo systemctl status tyto-camera.service
-- For stopping service :
+- Stopping service :
   - sudo systemctl stop tyto-camera.service
-- For turning off run of service on start
+- Turning off run of service on start
   - sudo systemctl disable tyto-camera.service
-- For turning on run of service on start
+- Turning on run of service on start
   - sudo systemctl enable tyto-camera.service
+- Log file:
+  - sudo tail -f /var/log/tytocam.log
