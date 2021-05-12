@@ -1,4 +1,4 @@
-import os
+import time
 import gi
 gi.require_version('Gst', '1.0')
 from gi.repository import GObject
@@ -256,7 +256,7 @@ class Camera:
                 self.pre_lon = self.lon
                 self.lat = None
                 self.lon = None
-            time.sleep(2)
+            time.sleep(1)
 
     def stop_pipeline(self):
         # Free resources

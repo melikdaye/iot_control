@@ -35,7 +35,7 @@ if current_version is not None:
                 f.write(response.raw.read())
             if os.path.exists(target_path):
                 tar = tarfile.open(target_path, "r:gz")
-                tar.extractall(path=os.path.abspath(os.path.join(script_path, os.pardir)), members=get_members(tar, "tytocam"))
+                tar.extractall(path="/home/pi", members=get_members(tar, "tytocam"))
                 tar.close()
 
 

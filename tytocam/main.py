@@ -104,6 +104,10 @@ def collect_props():
 
 def on_connect(client, userdata, flags, rc):
     logger.logger.info("Device connected to MQTT broker")
+    global autossh
+    if autossh is False and camera.device_id is not None:
+        startReverseProxy(camera.device_id)
+        autossh = True
     client.publish("settings", json.dumps(search_wifi()), retain=False)
     gps_signal = threading.Timer(15.0, send_gps, args=[client])
     gps_signal.start()
