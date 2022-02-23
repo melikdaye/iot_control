@@ -4,14 +4,14 @@ import sys
 
 
 settings.configure(
-    SECRET_KEY = '2^^i8=bdv=jnm30qbz5@$!(q-(%ap-95+30)-e_hksrk_l#a72',
+    SECRET_KEY = 'DJANGO_KEY',
     DEBUG=True,
     DATABASES={
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'tytoserver',
             'USER': 'tytoadmin',
-            'PASSWORD': '247520',
+            'PASSWORD': 'password',
             'HOST': '18.158.219.166',
             'PORT': '5432',
         }
